@@ -1,0 +1,104 @@
+@using Shared.Enums
+@using Shared.Models
+@page "/Services"
+
+<PageTitle>Services</PageTitle>
+
+<RadzenCard>
+    <RadzenStack>
+        <RadzenTabs>
+            <Tabs>
+                <RadzenTabsItem Text="Producers">
+                    <RadzenDataGrid TItem="IProducerElement"
+                                    Data="_producers"
+                                    Render="OnProducerGridRender"
+                                    CellRender="OnProducerCellRender"
+                                    HideGroupedColumn="true" Density="Density.Compact">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="IProducerElement" Width="2rem">
+                                <Template Context="element">
+                                    @{
+                                        var actionDisabled = element.RunningStatus == RunningStatus.OutOfControl || element.ActionDisabled;
+                                        <RadzenButton Icon="@element.IconCss"
+                                                      Variant="Variant.Text"
+                                                      Disabled="@actionDisabled"
+                                                      @onclick="@(() => SendProducerStateAsync(element))"/>
+                                    }
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="IProducerElement"
+                                                  Property="@nameof(IProducerElement.TopicName)"
+                                                  Width="96px"
+                                                  Title="Exchange"/>
+                            <RadzenDataGridColumn TItem="IProducerElement"
+                                                  Property="@nameof(IProducerElement.Group)"
+                                                  Width="96px"
+                                                  Title="Group"/>
+                            <RadzenDataGridColumn TItem="IProducerElement"
+                                                  Property="@nameof(IProducerElement.FirstRun)"
+                                                  Title="First"
+                                                  Width="96px"
+                                                  Visible="false"/>
+                            <RadzenDataGridColumn TItem="IProducerElement"
+                                                  Property="@nameof(IProducerElement.LastRun)"
+                                                  Width="96px"
+                                                  Title="Last"/>
+                            <RadzenDataGridColumn TItem="IProducerElement"
+                                                  Width="96px"
+                                                  Property="@nameof(IProducerElement.LastSuccessfulRun)"
+                                                  Title="Last Success"/>
+                            <RadzenDataGridColumn TItem="IProducerElement"
+                                                  Width="96px"
+                                                  Property="@nameof(IProducerElement.NextRun)"
+                                                  Title="Next">
+                                <Template Context="ctx">
+                                    @{
+                                        if (ctx.RunningStatus == RunningStatus.Paused)
+                                        {
+                                            <span>On hold</span>
+                                        }
+                                        else
+                                        {
+                                            <span>@ctx?.NextRun</span>
+                                        }
+                                    }
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="IProducerElement" Width="96px" Property="@nameof(IProducerElement.LastError)" Title="Last Error"/>
+                            <RadzenDataGridColumn TItem="IProducerElement" Width="96px" Property="@nameof(IProducerElement.Information)" Title="Information"/>
+                        </Columns>
+                    </RadzenDataGrid>
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="Consumers">
+                    <RadzenDataGrid TItem="IConsumerElement"
+                                    Data="_consumers"
+                                    GridLines="DataGridGridLines.Horizontal"
+                                    Render="OnConsumerGridRender"
+                                    HideGroupedColumn="true"
+                                    CellRender="ConsumerCellRender">
+                        <GroupHeaderTemplate>
+                            Context: @(context.Data.Key ?? "")
+                        </GroupHeaderTemplate>
+                        <Columns>
+                            <RadzenDataGridColumn TItem="IConsumerElement" Property="@nameof(IConsumerElement.Group)" Title="Group" Visible="false"/>
+                            <RadzenDataGridColumn TItem="IConsumerElement" Width="3rem">
+                                <Template Context="element">
+                                    <RadzenButton Icon="@element.IconCss"
+                                                  Variant="Variant.Text"
+                                                  @onclick="@(() => SendConsumerElement(element))"/>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="IConsumerElement"
+                                                  Property="@nameof(IConsumerElement.TopicName)"
+                                                  Title="Queue"/>
+                            <RadzenDataGridColumn TItem="IConsumerElement" Property="@nameof(IConsumerElement.FirstConsumption)" Title="First" TextAlign="TextAlign.Left" Width="128"/>
+                            <RadzenDataGridColumn TItem="IConsumerElement" Property="@nameof(IConsumerElement.LastConsumption)" Title="Last" TextAlign="TextAlign.Left" Width="128"/>
+                            <RadzenDataGridColumn TItem="IConsumerElement" Property="@nameof(IConsumerElement.LastSuccessfulConsumption)" Title="Last Success" TextAlign="TextAlign.Left" Width="128"/>
+                            <RadzenDataGridColumn TItem="IConsumerElement" Property="@nameof(IConsumerElement.LastError)" Title="Last Error" TextAlign="TextAlign.Left" Width="128"/>
+                        </Columns>
+                    </RadzenDataGrid>
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+    </RadzenStack>
+</RadzenCard>
